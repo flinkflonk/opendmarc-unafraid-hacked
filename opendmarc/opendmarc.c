@@ -4590,7 +4590,7 @@ main(int argc, char **argv)
 			n -= status;
 		}
 
-		syslog(LOG_INFO, "%s v%s starting (%s)", DMARCF_PRODUCT,
+		syslog(LOG_INFO, "%s v%s starting (%s) (DEBUG GALORE VERSION)", DMARCF_PRODUCT,
 		       VERSION, argstr);
 
 		memset(argstr, '\0', sizeof argstr);
