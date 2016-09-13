@@ -76,7 +76,7 @@
 #include "opendmarc-dstring.h"
 
 /* macros */
-#define	CMDLINEOPTS	"Ac:flnp:P:t:u:vV"
+#define	CMDLINEOPTS	"Ac:Dflnp:P:t:u:vV"
 #define	DEFTIMEOUT	5
 #define	MAXSPFRESULT	16
 #define	RECEIVEDSPF	"Received-SPF"
