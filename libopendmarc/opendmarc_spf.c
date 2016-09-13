@@ -180,8 +180,12 @@ opendmarc_spf2_test(char *ip_address, char *mail_from_domain, char *helo_domain,
 	ctx->spf_response = NULL;
 	SPF_request_query_mailfrom(ctx->spf_request, &(ctx->spf_response));
 
-	if (human_readable != NULL)
+	if (human_readable != NULL) {
+		if (_debug) syslog(LOG_INFO, "opendmarc_spf2_test: \"%s\"\n", human_readable);
 		(void) strlcpy(human_readable, SPF_strresult(SPF_response_result(ctx->spf_response)), human_readable_len);
+	} else {
+		if (_debug) syslog(LOG_INFO, "opendmarc_spf2_test: no result\n");
+	}
 	ctx->spf_result = SPF_response_result(ctx->spf_response);
 	ret = (int) ctx->spf_result;
 	ctx = opendmarc_spf2_free_ctx(ctx);
