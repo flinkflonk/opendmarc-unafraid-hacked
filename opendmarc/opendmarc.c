@@ -3528,6 +3528,7 @@ usage(void)
 	fprintf(stderr, "%s: usage: %s [options]\n"
 	                "\t-A         \tenable auto-restart\n"
 	                "\t-c file    \tconfiguration file\n"
+			"\t-D         \tdebug\n"
 	                "\t-f         \trun in the foreground\n"
 	                "\t-l         \tlog to syslog\n"
 	                "\t-n         \ttest configuration and exit\n"
@@ -3551,6 +3552,8 @@ usage(void)
 **  Return value:
 **  	Exit status.
 */
+
+_Bool debug = FALSE;
 
 int
 main(int argc, char **argv)
@@ -3633,6 +3636,10 @@ main(int argc, char **argv)
 			if (optarg == NULL || *optarg == '\0')
 				return usage();
 			conffile = optarg;
+			break;
+
+		  case 'D':
+			debug = TRUE;
 			break;
 
 		  case 'f':
@@ -3939,6 +3946,7 @@ main(int argc, char **argv)
 		curconf->conf_dolog = FALSE;
 		autorestart = FALSE;
 		dofork = FALSE;
+		debug = TRUE;
 		become = NULL;
 		pidfile = NULL;
 		chrootdir = NULL;

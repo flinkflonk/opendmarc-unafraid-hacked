@@ -97,6 +97,7 @@ opendmarc_spf2_find_mailfrom_domain(SPF_CTX_T *spfctx, char *raw_address, char *
 
 	(void) memset(mailfrom, '\0', mailfrom_len);
 	(void) strlcpy(mailfrom, cp, mailfrom_len);
+	if (_debug) syslog(LOG_INFO, "opendmarc_spf2_find_mailfrom_domain: '%s'\n", mailfrom);
 	return 0;
 }
 
