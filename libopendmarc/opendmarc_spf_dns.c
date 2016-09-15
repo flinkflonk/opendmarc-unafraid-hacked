@@ -734,6 +734,7 @@ got_spf_record:
 				}
 			}
 		}
+		if (_debug) syslog(LOG_INFO, "got SPF record: '%s'\n", txt);
 		if (spfcheck == TRUE)
 		{
 			/*
