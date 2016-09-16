@@ -190,6 +190,14 @@ Sets the debug level to be requested from the milter library.  The
 default is 0.
 
 .TP
+.I OverrideMLM (string)
+Specifies the path to a file that contains a list of hostnames, IP
+addresses, and/or CIDR expressions identifying hosts that run
+mailing lists. Mails from these systems will be accepted even if
+all DMARC tests fail. Such cases will be reported as "override/
+reason: MLM"
+
+.TP
 .I PidFile (string)
 Specifies the path to a file that should be created at process start
 containing the process ID.

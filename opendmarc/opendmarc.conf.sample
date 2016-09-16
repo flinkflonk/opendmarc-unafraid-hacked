@@ -212,6 +212,17 @@
 #
 # MilterDebug 0
 
+## OverrideMLM (path)
+##  default (none)
+##
+## Specifies the path to a file that contains a list of hostnames, IP
+## addresses, and/or CIDR expressions identifying hosts that run
+## mailing lists. Malis from these systems will be accepted even if
+## all DMARC tests fail. Such cases will be reported as "override/
+## reason: MLM"
+#
+# OverrideMLM /usr/local/etc/opendmarc/overrideMLM.conf
+
 ##  PidFile path
 ##  	default (none)
 ##
