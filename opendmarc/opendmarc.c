@@ -168,6 +168,7 @@ struct dmarcf_config
 	char *			conf_ignorelist;
 	char **			conf_trustedauthservids;
 	char **			conf_ignoredomains;
+	struct list *		conf_overridemlm;
 };
 
 /* LIST -- basic linked list of strings */
@@ -1220,6 +1221,18 @@ dmarcf_config_load(struct config *data, struct dmarcf_config *conf,
 		(void) config_get(data, "IgnoreMailFrom", &str, sizeof str);
 		if (str != NULL)
 			dmarcf_mkarray(str, &conf->conf_ignoredomains);
+
+		str = NULL;
+		(void) config_get(data, "OverrideMLM", &str, sizeof str);
+		if (str != NULL)
+		{
+			if (!dmarcf_loadlist(str, &conf->conf_overridemlm))
+			{
+				fprintf(stderr,
+					"%s: can't load override MLM list from %s: %s\n",
+					progname, str, strerror(errno));
+			}
+		}
 
 		(void) config_get(data, "AuthservIDWithJobID",
 		                  &conf->conf_authservidwithjobid,
@@ -2988,30 +3001,46 @@ mlfi_eom(SMFICTX *ctx)
 	  case DMARC_POLICY_REJECT:		/* Explicit reject */
 		aresult = "fail";
 
-		if (conf->conf_rejectfail && random() % 100 < pct)
+		if (conf->conf_overridemlm != NULL &&
+			(dmarcf_checkhost(cc->cctx_host, conf->conf_overridemlm) ||
+			(dmarcf_checkip((struct sockaddr *)&cc->cctx_ip, conf->conf_overridemlm))))
 		{
-			snprintf(replybuf, sizeof replybuf,
-			         "rejected by DMARC policy for %s", pdomain);
-
-			status = dmarcf_setreply(ctx, DMARC_REJECT_SMTP,
-			                         DMARC_REJECT_ESC, replybuf);
-			if (status != MI_SUCCESS && conf->conf_dolog)
+			if (conf->conf_dolog)
 			{
-				syslog(LOG_ERR, "%s: smfi_setreply() failed",
-				       dfc->mctx_jobid);
+				syslog(LOG_INFO, "%s: overriding policy for mail from %s: MLM",
+				dfc->mctx_jobid);
 			}
 
-			ret = SMFIS_REJECT;
-			result = DMARC_RESULT_REJECT;
+			ret = SMFIS_ACCEPT;
+			result = DMARC_RESULT_OVRD_MAILING_LIST;
 		}
-
-		if (conf->conf_copyfailsto != NULL)
+		else
 		{
-			status = dmarcf_addrcpt(ctx, conf->conf_copyfailsto);
-			if (status != MI_SUCCESS && conf->conf_dolog)
+			if (conf->conf_rejectfail && random() % 100 < pct)
 			{
-				syslog(LOG_ERR, "%s: smfi_addrcpt() failed",
-				       dfc->mctx_jobid);
+				snprintf(replybuf, sizeof replybuf,
+				        "rejected by DMARC policy for %s", pdomain);
+
+				status = dmarcf_setreply(ctx, DMARC_REJECT_SMTP,
+			                         DMARC_REJECT_ESC, replybuf);
+				if (status != MI_SUCCESS && conf->conf_dolog)
+				{
+					syslog(LOG_ERR, "%s: smfi_setreply() failed",
+					       dfc->mctx_jobid);
+				}
+
+				ret = SMFIS_REJECT;
+				result = DMARC_RESULT_REJECT;
+			}
+
+			if (conf->conf_copyfailsto != NULL)
+			{
+				status = dmarcf_addrcpt(ctx, conf->conf_copyfailsto);
+				if (status != MI_SUCCESS && conf->conf_dolog)
+				{
+					syslog(LOG_ERR, "%s: smfi_addrcpt() failed",
+					       dfc->mctx_jobid);
+				}
 			}
 		}
 
@@ -3020,30 +3049,47 @@ mlfi_eom(SMFICTX *ctx)
 	  case DMARC_POLICY_QUARANTINE:		/* Explicit quarantine */
 		aresult = "fail";
 
-		if (conf->conf_rejectfail && random() % 100 < pct)
+		if (conf->conf_overridemlm != NULL &&
+			(dmarcf_checkhost(cc->cctx_host, conf->conf_overridemlm) ||
+			(dmarcf_checkip((struct sockaddr *)&cc->cctx_ip, conf->conf_overridemlm))))
 		{
-			snprintf(replybuf, sizeof replybuf,
-			         "quarantined by DMARC policy for %s",
-			         pdomain);
-
-			status = smfi_quarantine(ctx, replybuf);
-			if (status != MI_SUCCESS && conf->conf_dolog)
+			if (conf->conf_dolog)
 			{
-				syslog(LOG_ERR, "%s: smfi_quarantine() failed",
-				       dfc->mctx_jobid);
+				syslog(LOG_INFO, "%s: overriding policy for mail from %s: MLM",
+					dfc->mctx_jobid, domain);
 			}
 
 			ret = SMFIS_ACCEPT;
-			result = DMARC_RESULT_QUARANTINE;
+			result = DMARC_RESULT_OVRD_MAILING_LIST;
 		}
-
-		if (conf->conf_copyfailsto != NULL)
+		else
 		{
-			status = dmarcf_addrcpt(ctx, conf->conf_copyfailsto);
-			if (status != MI_SUCCESS && conf->conf_dolog)
+
+			if (conf->conf_rejectfail && random() % 100 < pct)
 			{
-				syslog(LOG_ERR, "%s: smfi_addrcpt() failed",
-				       dfc->mctx_jobid);
+				snprintf(replybuf, sizeof replybuf,
+				         "quarantined by DMARC policy for %s",
+				         pdomain);
+
+				status = smfi_quarantine(ctx, replybuf);
+				if (status != MI_SUCCESS && conf->conf_dolog)
+				{
+					syslog(LOG_ERR, "%s: smfi_quarantine() failed",
+				       		dfc->mctx_jobid);
+				}
+
+				ret = SMFIS_ACCEPT;
+				result = DMARC_RESULT_QUARANTINE;
+			}
+
+			if (conf->conf_copyfailsto != NULL)
+			{
+				status = dmarcf_addrcpt(ctx, conf->conf_copyfailsto);
+				if (status != MI_SUCCESS && conf->conf_dolog)
+				{
+					syslog(LOG_ERR, "%s: smfi_addrcpt() failed",
+					       dfc->mctx_jobid);
+				}
 			}
 		}
 
