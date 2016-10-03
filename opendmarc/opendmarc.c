@@ -2787,6 +2787,15 @@ mlfi_eom(SMFICTX *ctx)
 			if (strncasecmp(ruv[c], "mailto:", 7) != 0)
 				continue;
 
+			for (int x = 0; ruv[c][x] != '\0'; x++)
+			{
+				if (ruv[c][x] == '!')
+				{
+					ruv[c][x] = '\0';
+					break;
+				}
+			}
+
 			if (first)
 			{
 				dmarcf_dstring_cat(dfc->mctx_afrf, "To: ");
