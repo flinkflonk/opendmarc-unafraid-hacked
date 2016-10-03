@@ -825,8 +825,6 @@ foreach (@$domainset)
 		    $uri->opaque eq "")
 		{
 			print STDERR "$progname: can't parse reporting URI for domain $domain\n";
-			unlink($zipfile);
-			unlink($repfile);
 			next;
 		}
 
@@ -874,8 +872,6 @@ foreach (@$domainset)
 				print STDERR "$progname: unknown URI scheme in '$repuri' for domain $domain\n";
 			}
 
-			unlink($zipfile);
-			unlink($repfile);
 			next;
 		}
 		# send/post report
@@ -887,8 +883,6 @@ foreach (@$domainset)
 			if (!open($zipin, $zipfile))
 			{
 				print STDERR "$progname: can't read zipped report for $domain: $!\n";
-				unlink($zipfile);
-				unlink($repfile);
 				next;
 			}
 
@@ -966,8 +960,6 @@ foreach (@$domainset)
 		else
 		{
 			print STDERR "$progname: unsupported reporting URI scheme " . $uri->scheme . " for domain $domain\n";
-			unlink($zipfile);
-			unlink($repfile);
 			next;
 		}
 	}
