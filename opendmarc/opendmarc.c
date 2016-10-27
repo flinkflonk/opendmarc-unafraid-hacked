@@ -2743,7 +2743,7 @@ mlfi_eom(SMFICTX *ctx)
 
 	/* prepare human readable policy string for later processing */
 	switch (opendmarc_get_policy_token_used(cc->cctx_dmarc) == DMARC_USED_POLICY_IS_SP ? sp : p)
-	
+	{
 	  case DMARC_RECORD_P_QUARANTINE:
 		apolicy = "quarantine";
 		break;
