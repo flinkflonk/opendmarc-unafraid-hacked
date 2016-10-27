@@ -3047,7 +3047,8 @@ mlfi_eom(SMFICTX *ctx)
 			if (conf->conf_dolog)
 			{
 				syslog(LOG_INFO, "%s: overriding policy for mail from %s: MLM",
-				dfc->mctx_jobid);
+				dfc->mctx_jobid,
+				domain);
 			}
 
 			ret = SMFIS_ACCEPT;
