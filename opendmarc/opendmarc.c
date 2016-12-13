@@ -1380,7 +1380,7 @@ dmarcf_config_load(struct config *data, struct dmarcf_config *conf,
 	}
 
 	if ( conf->conf_rejectstring == NULL ) {
-		conf->conf_rejectstring = DEFREJECTSTR
+		conf->conf_rejectstring = DEFREJECTSTR;
 	}
 	else {
 		/* Count occurrences of "%s" in RejectString */
