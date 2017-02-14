@@ -109,7 +109,6 @@ opendmarc_tld_read_file(char *path_fname, char *commentstring, char *drop, char 
 	FILE *	fp;
 	u_char 	buf[BUFSIZ];
 	char *	cp;
-	void *	vp;
 	int	nlines;
 	int	ret;
 	u_char	revbuf[MAXDNSHOSTNAME];
@@ -185,7 +184,6 @@ got_xn:
 		if (adddot == TRUE)
 			(void) strlcat((char *)revbuf, ".", sizeof revbuf);
 
-		vp = opendmarc_hash_lookup(hashp, revbuf, (void *)revbuf, strlen(revbuf));
 		nlines++;
 	}
 	(void) fclose(fp);

@@ -112,11 +112,9 @@ dmarc_dns_get_record(char *domain, int *reply, char *got_txtbuf, size_t got_txtl
 	int		ch	= 0;
 	short		cur_len	= 0;
 	HEADER		header;
-	int		class	= -1;
 	int		acnt	= -1;
 	int		qdcnt	= -1;
 	u_short		type	= 0;
-	u_long		ttl	= 0;
 	char *		bp	= NULL;
 	int		fake_reply	= 0;
 	int *		reply_ptr	= NULL;
@@ -255,7 +253,6 @@ dmarc_dns_get_record(char *domain, int *reply, char *got_txtbuf, size_t got_txtl
 			return NULL;
 		}
 		GETSHORT(type, cur_ptr);  
-		GETSHORT(class, cur_ptr);
 	}
 	if (header.rcode != NOERROR)
 	{
@@ -286,9 +283,6 @@ dmarc_dns_get_record(char *domain, int *reply, char *got_txtbuf, size_t got_txtl
 			return NULL;
 		}
 		GETSHORT(type, cur_ptr);
-		GETSHORT(class, cur_ptr);
-		/* we may want to use the ttl later */
-		GETLONG(ttl, cur_ptr);
 
 		if (type == T_CNAME)
 		{
