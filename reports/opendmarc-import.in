@@ -501,7 +501,7 @@ while (<STDIN>)
 				}
 
 	  case "from"		{
-					$fdomain = $value;
+					$fdomain = lc($value);
 				}
 
 	  case "job"		{
@@ -539,7 +539,7 @@ while (<STDIN>)
 				}
 
 	  case "mfrom"		{
-					$envdomain = $value;
+					$envdomain = lc($value);
 				}
 
 	  case "p"		{
@@ -551,7 +551,7 @@ while (<STDIN>)
 				}
 
 	  case "pdomain"	{
-					$pdomain = $value;
+					$pdomain = lc($value);
 				}
 
 	  case "policy"		{
