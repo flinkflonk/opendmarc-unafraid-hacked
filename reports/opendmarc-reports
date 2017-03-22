@@ -156,6 +156,7 @@ sub usage
 	print STDERR "\t--keepfiles        keep xml files (in local directory)\n";
 	print STDERR "\t -n                synonym for --test\n";
 	print STDERR "\t--nodomain=name    omit a report for named domain\n";
+	print STDERR "\t--skipdomains=file	list of domains to omit a report for\n";
 	print STDERR "\t--noupdate         don't record report transmission\n";
 	print STDERR "\t--report-email     reporting contact [$repemail]\n";
 	print STDERR "\t--report-org       reporting organization [$repdom]\n";
@@ -172,6 +173,19 @@ sub usage
 # set locale
 setlocale(LC_ALL, 'C');
 
+sub loadskipdomains
+{
+	die "Could not open domains file $_[1]" unless open FILE,"<",$_[1];
+	while (my $line = <FILE>)
+	{
+		$line =~ s/\s*#.*//;
+		$line =~ s/^\s+//;
+		$line =~ s/\s+//;
+		push(@skipdomains, $line);
+	}
+	close FILE;
+}
+
 # parse command line arguments
 my $opt_retval = &Getopt::Long::GetOptions ('day!' => \$daybound,
                                             'dbhost=s' => \$dbhost,
@@ -187,6 +201,7 @@ my $opt_retval = &Getopt::Long::GetOptions ('day!' => \$daybound,
                                             'nodomain=s' => \@skipdomains,
                                             'report-email=s' => \$repemail,
                                             'report-org=s' => \$repdom,
+					    'skipdomains=s' => \&loadskipdomains,
                                             'smtp-server=s' => \$smtp_server,
                                             'smtp-port=i' => \$smtp_port,
                                             'update!' => \$doupdate,
