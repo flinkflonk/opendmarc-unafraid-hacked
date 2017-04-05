@@ -128,13 +128,13 @@ opendmarc_tld_read_file(char *path_fname, char *commentstring, char *drop, char 
 	if (commentstring == NULL)
 		commentstring = "//";
 
-	hashp = opendmarc_hash_init(4096 * 2);
-	if (hashp == NULL)
-		return (errno == 0) ? ENOMEM : errno;
-
 	fp = fopen(path_fname, "r");
 	if (fp == NULL)
 		return errno;
+
+	hashp = opendmarc_hash_init(4096 * 2);
+	if (hashp == NULL)
+		return (errno == 0) ? ENOMEM : errno;
 
 	errno = 0;
 	while (fgets((char *)buf, sizeof buf, fp) != NULL)
