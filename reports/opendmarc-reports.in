@@ -758,8 +758,8 @@ foreach (@$domainset)
 			}
 			if (defined($dkim_domain_result_cache{$dkimdomain}{$dkimresult}))
 			{
-				#next; # no duplicate per-record auth-result dkim sections
 				print STDERR "$progname: WARNING! Duplicate DKIM results for same domain detected.\n";
+				next; # no duplicate per-record auth-result dkim sections
 			}
 			$dkim_domain_result_cache{$dkimdomain}{$dkimresult}++;
 
