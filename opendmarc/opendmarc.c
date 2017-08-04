@@ -2583,7 +2583,7 @@ mlfi_eom(SMFICTX *ctx)
 				&used_mfrom);
 			if (used_mfrom == TRUE)
 			{
-				use_domain = dfc->mctx_envfrom;
+				use_domain = dfc->mctx_envdomain;
 				spf_mode   = DMARC_POLICY_SPF_ORIGIN_MAILFROM;
 			}
 			else
