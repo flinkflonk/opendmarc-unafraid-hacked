@@ -877,6 +877,11 @@ opendmarc_get_policy_to_enforce(DMARC_POLICY_T *pctx)
 **		DMARC_PARSE_ERROR_BAD_VALUE	-- if value following = was bad
 **		DMARC_PARSE_ERROR_NO_REQUIRED_P -- if p= was absent
 **		DMARC_PARSE_OKAY		-- On Success
+**      It should be allowed to return other codes for the following three
+**      conditions:
+**              no tag 'v' with value 'DMARC1' found
+**              tag 'v' with value 'DMARC1' found, but not as the first tag
+**              tag 'p' with a valid policy found, but not as the second tag
 **	Side Effects:
 **		Allocates memory.
 *********************************************************************************/
@@ -887,6 +892,10 @@ opendmarc_policy_parse_dmarc(DMARC_POLICY_T *pctx, u_char *domain, u_char *recor
 	u_char copy[BUFSIZ];
 	u_char cbuf[512];
 	u_char vbuf[512];
+	int tag_number = 0;
+	int valid_v_is_first = 0;
+	int valid_p_is_second = 0;
+	int valid_v_seen = 0;
 
 	if (pctx == NULL || domain == NULL || record == NULL || strlen((char *)record) == 0)
 	{
@@ -934,6 +943,10 @@ opendmarc_policy_parse_dmarc(DMARC_POLICY_T *pctx, u_char *domain, u_char *recor
 		 * vp now points to the token's value 
 		 * both with all surronding whitepace removed.
 		 */
+		tag_number++;
+#ifdef DEBUG_DMARC_RECORD_PARSER
+		syslog(LOG_INFO, "DEBUG: n: '%i', cp: '%s', vp: '%s'\n", tag_number, (char *)cp, (char *)vp);
+#endif
 		if (strcasecmp((char *)cp, "v") == 0)
 		{
 			/*
@@ -944,6 +957,8 @@ opendmarc_policy_parse_dmarc(DMARC_POLICY_T *pctx, u_char *domain, u_char *recor
 			{
 				return DMARC_PARSE_ERROR_BAD_VERSION;
 			}
+			valid_v_is_first = (1 == tag_number) ? 1 : 0;
+			valid_v_seen = 1;
 		}
 		else if (strcasecmp((char *)cp, "p") == 0)
 		{
@@ -962,6 +977,7 @@ opendmarc_policy_parse_dmarc(DMARC_POLICY_T *pctx, u_char *domain, u_char *recor
 				/* A totaly unknown value */
 				return DMARC_PARSE_ERROR_BAD_VALUE;
 			}
+			valid_p_is_second = (2 == tag_number) ? 1 : 0;
 		}
 		else if (strcasecmp((char *)cp, "sp") == 0)
 		{
@@ -1203,6 +1219,30 @@ opendmarc_policy_parse_dmarc(DMARC_POLICY_T *pctx, u_char *domain, u_char *recor
 	if (pctx->fo == DMARC_RECORD_FO_UNSPECIFIED)
 		pctx->fo = DMARC_RECORD_FO_0;
 
+#ifdef DEBUG_DMARC_RECORD_PARSER
+	syslog(LOG_INFO, "DEBUG: valid_v_seen: %i, valid_v_is_first: %i, valid_p_is_second: %i\n", valid_v_seen, valid_v_is_first, valid_p_is_second);
+#endif
+	if (1 != valid_v_seen)
+	{
+#ifdef DEBUG_DMARC_RECORD_PARSER
+		syslog(LOG_INFO, "DEBUG: DMARC record does not contain 'v=DMARC1'\n");
+#endif
+		return DMARC_PARSE_ERROR_BAD_VERSION;
+	}
+	if (1 != valid_v_is_first)
+	{
+#ifdef DEBUG_DMARC_RECORD_PARSER
+		syslog(LOG_INFO, "DEBUG: DMARC record does contain 'v=DMARC1', but it is not the first tag\n");
+#endif
+		return DMARC_PARSE_ERROR_BAD_VERSION;
+	}
+	if (1 != valid_p_is_second)
+	{
+#ifdef DEBUG_DMARC_RECORD_PARSER
+		syslog(LOG_INFO, "DEBUG: DMARC record does contain 'p=$policy', but it is not the second tag\n");
+#endif
+		return DMARC_PARSE_ERROR_BAD_VERSION;
+	}
 	if (pctx->from_domain == NULL)
 		pctx->from_domain = strdup(domain);
 	return DMARC_PARSE_OKAY;
