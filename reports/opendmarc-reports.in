@@ -193,7 +193,7 @@ my $opt_retval = &Getopt::Long::GetOptions ('day!' => \$daybound,
                                             'smtp-port=i' => \$smtp_port,
                                             'update!' => \$doupdate,
                                             'utc!' => \$use_utc,
-                                            'verbose+' => \$verbose,
+                                            'verbose' => \$verbose,
                                             'version!' => \$showversion,
                                            );
 
